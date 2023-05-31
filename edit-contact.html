@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Contact Book</title>
+        <link rel="icon" href="#" type="image/x-icon">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="css/style.css">
+        <style>
+            body {
+                background: url(img/windows-11-stock-sunset-orange-3840x2160-8955.png);
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                background-size: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+            .contact
+            {
+                margin-top: 55px;
+            }
+            #avatarImage img
+            {
+                border-radius: 5%;
+                box-shadow: 0 0 35px whitesmoke;
+            }
+            #avatar
+            {
+                margin-left: 32.5%;
+            }
+            button
+            {
+                width: 100px;
+                height: 35px;
+            }
+        </style>
+    </head>
+    <body onload="getContact()">
+        <br/><br/>
+        <div class="">
+            <header>
+                <div class="glass edit d-flex flex-column align-items-center mt-2 p-3 bg-gradient border-bottom border-5 box-shadow fixed-top">
+                    <a class="navbar-brand fs-4 fw-bolder" href="#">Edit Contact</a>
+                </div>
+            </header>
+            <div class="contact row align-items-start align-items-center justify-content-center p-1">
+                <div id="avatarImage" class="col"></div>
+                <form id="editForm" class="glass col d-flex flex-column align-items-center justify-content-center" style="width: 400px;">
+                    <label for="firstname">First name</label>
+                    <input type="text" name="firstname" id="firstname" readonly><br/>
+                    <label for="lastname">Last name</label>
+                    <input type="text" name="lastname" id="lastname" readonly><br/>
+                    <label for="mobile">Mobile</label>
+                    <input type="text" name="mobile" id="mobile" readonly><br/>
+                    <label for="email">Email</label>
+                    <input type="text" name="email" id="email" readonly><br/>
+                    <label for="avatar" id="avatarLabel" hidden>Change profile image</label><br/>
+                    <input type="file" name="avatar" id="avatar" hidden style="color: red;"><br/>
+                    <br/>
+                    <button type="submit" id="submitForm" hidden style="--clr:#6eff3e"><span>Submit</span><i></i></button>
+                </form>
+            </div>
+        </div>
+        <div class="flex p-2">
+            <button id="homeLink" type="button" style="--clr:#1e9bff"><span>Home</span><i></i></button>
+            <button id="editContact" type="button" style="--clr:#ffcc00"><span>Edit</span><i></i></button>
+            <button id="deleteContact" type="button" style="--clr:#ff0111"><span>Delete</span><i></i></button>
+        </div>
+
+        <script src="js/config.js"></script>
+        <script>
+            var id = getId();
+            document.getElementById("homeLink").addEventListener('click', homeLink);
+            document.getElementById("editContact").addEventListener('click', editContact);
+            document.getElementById("submitForm").addEventListener('click', submitForm);
+            document.getElementById("deleteContact").addEventListener('click', deleteContact);
+
+            function getId(){
+                var url = window.location.href;
+                var pos = url.search("=");
+                var id = url.slice(pos + 1);
+                
+                return id;
+            }
+
+            function getContact(){
+                fetch(rootPath + 'controller/get-contacts/?id=' + id)
+                .then(function(response){
+                    return response.json();
+                })
+                .then(function(data){
+                    displayOutput(data);
+                })
+            }
+
+            function homeLink(){
+                window.open("index.html", "_self");
+            }
+
+            function displayOutput(data){
+                avatarImg = `
+                    <img src="${rootPath}/controller/uploads/${data[0].avatar}" width="200"/>
+                `
+                document.getElementById("avatarImage").innerHTML = avatarImg;
+                document.getElementById("firstname").value = data[0].firstname;
+                document.getElementById("lastname").value = data[0].lastname;
+                document.getElementById("mobile").value = data[0].mobile;
+                document.getElementById("email").value = data[0].email;
+            }
+
+            function editContact(){
+                document.getElementById("editForm").style.marginTop = "-30px";
+                document.getElementById("avatarImage").hidden = true;
+                document.getElementById("firstname").readOnly = false;
+                document.getElementById("lastname").readOnly = false;
+                document.getElementById("mobile").readOnly = false;
+                document.getElementById("email").readOnly = false;
+                document.getElementById("avatar").hidden = false;
+                document.getElementById("submitForm").hidden = false;
+            }
+
+            function submitForm(e){
+                e.preventDefault();
+
+                const form = new FormData(document.querySelector("#editForm"));
+                form.append('apiKey', apiKey);
+                form.append('id', id);
+
+                fetch(rootPath + 'controller/edit-contact/', {
+                    method: 'POSTS',
+                    headers: {'Accept': 'application/json, *.*'},
+                    body: form
+                
+                })
+                .then(function(response){
+                    return response.text();
+                })
+                .then(function(data){
+                    if(data == "1"){
+                        alert("Contact edited.");
+                        homeLink();
+                    }else{
+                        alert(data);
+                        homeLink();
+                    }
+                })
+            }
+
+            function deleteContact(){
+                var confirmDelete = confirm("Delete contact. Are you sure?");
+
+                if(confirmDelete == true){
+                    fetch(rootPath + "controller/delete-contant/?id=" + id)
+                    .then(function(response){
+                        return response.text();
+                    })
+                    .then(function(data){
+                        if(data == "1"){
+                            homeLink();
+                        }else{
+                            alert(data);
+                        }
+                    })
+                }
+            }
+        </script>
+    </body>
+</html>

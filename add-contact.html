@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Contact Book</title>
+        <link rel="icon" href="img/Contacts-Book-Icon.png" type="image/x-icon">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="css/style.css">
+        <style>
+            body {
+                background: url(img/windows-11-stock-orange-abstract-dark-background-3840x2160-8960.png);
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                background-size: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+            #avatar
+            {
+                margin-left: 35%;
+            }
+            button
+            {
+                width: 100px;
+                height: 35px;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="glass edit d-flex flex-column align-items-center mt-2 p-3 bg-gradient border-bottom border-5 box-shadow fixed-top">
+                <a class="navbar-brand fs-4 fw-bolder" href="#">Add Contact</a>
+            </div>
+        </header>
+        <form id="editForm" class="glass d-flex flex-column align-items-center justify-content-center" style="width: 400px;">
+            <label for="firstname">First name</label>
+            <input type="text" name="firstname" id="firstname"><br/>
+            <label for="lastname">Last name</label>
+            <input type="text" name="lastname" id="lastname"><br/>
+            <label for="mobile">Mobile</label>
+            <input type="text" name="mobile" id="mobile"><br/>
+            <label for="email">Email</label>
+            <input type="text" name="email" id="email"><br/>
+            <label for="avatar">Select a file</label>
+            <input type="file" name="avatar" id="avatar" style="color: red;"><br/>
+            <button type="submit" id="submitForm" style="--clr:#6eff3e"><span>Submit</span><i></i></button>
+        </form>
+        <br/>
+        <button id="homeLink" type="button" style="--clr:#6eff3e"><span>Home</span><i></i></button>
+
+        <script src="js/config.js"></script>
+        <script>
+            document.getElementById("submitForm").addEventListener('click', submitForm);
+            document.getElementById("homeLink").addEventListener('click', homeLink);
+
+            function submitForm(e) {
+                e.preventDefault();
+
+                const form = new FormData(document.querySelector('#editForm'));
+                form.append('apiKey', apiKey);
+
+                fetch(rootPath + 'controller/insert-contact/', {
+                        method: 'POST',
+                        headers: {'Accept': 'application/json, *.*'},
+                        body: form
+                    })
+                    .then(function(response) {
+                        return response.text();
+                    })
+                    .then(function(data) {
+                        if (data == "1") {
+                            alert("Contact added.");
+                            homeLink();
+                        } else {
+                            alert(data);
+                            homeLink();
+                        }
+
+                    })
+            }
+
+            function homeLink() {
+                window.open("index.html", "_self");
+            }
+        </script>
+    </body>
+</html>
